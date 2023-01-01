@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using System.Net;
 using System.Threading;
 using BookEpisodeScanner.Classes;
+using BookEpisodeScanner.Constants;
 
 namespace BookEpisodeScanner
 {
