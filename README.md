@@ -8,4 +8,6 @@ This is a simple program for checking for new episodes of books from a specific 
 
 There's also features for logging that it found the episode to a discord bot and sending emails to note there was a problem or if the episode has been found, thus allowing someone to know if it's found without having to watch the computer running it.
 
+To use, create a new "Scanner" object in Program.cs with whichever book and episode number you'd like to download and call the scanner's "Run()" function. The episode number should be the last episode already released and it will scan for the "next" episode. I run this directly from Visual Studio.
+
 This is generally just used by me, so I didn't bother to add a lot of customizability or a database. So there's no UI outside of the console and you need to manually add constants for a new book or episode you want to look up. If I were to expand this in the future I could do something like add a database rather than a big list of constants so the program could just get "the newest episode" of a book rather than needing to manually look up the last episode's ID from the website. I didn't go that far because I'm probably the only use for this.
