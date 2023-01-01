@@ -1,4 +1,5 @@
 ﻿using BookEpisodeScanner.Entities;
+using BookEpisodeScanner.Loggers;
 using BookEpisodeScanner.Utilities;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -16,6 +17,7 @@ namespace BookEpisodeScanner.Classes
         DiscordBot bot;
         IConfigurationRoot config;
         Logger logger;
+        EmailNotifier emailNotifier;
         BookData previousBookData;
         int attemptNumber;
         bool done;
@@ -31,8 +33,8 @@ namespace BookEpisodeScanner.Classes
                 .AddJsonFile($"appsettings.json", true, true)
                 .AddEnvironmentVariables();
             config = builder.Build();
-            logger = new Logger();
-            logger.localLogLocation = config["localLogLocation"];
+            logger = new Logger(config["localLogLocation"], Convert.ToBoolean(config["logToTextFile"]));
+            emailNotifier = new EmailNotifier(config);
             bot = new DiscordBot(config);
 
             settings.BookId = bookId;
@@ -65,7 +67,6 @@ namespace BookEpisodeScanner.Classes
 
                 try
                 {
-
                     HttpStatusCode currentStatusCode = await WebHelper.GetUrlStatusCode(previewImageUrl);
 
                     switch (currentStatusCode)
@@ -90,7 +91,7 @@ namespace BookEpisodeScanner.Classes
                         default:
                             //Email that we somehow got some other error
                             logger.Log(String.Format("Got weird response code: {0}. Current time is: {0}", currentStatusCode.ToString(), DateTime.Now.ToString()));
-                            EmailHelper.SendNotificationEmailError(config, "Main", "Got weird response code: " + currentStatusCode.ToString());
+                            emailNotifier.SendNotificationEmailError("Main", "Got weird response code: " + currentStatusCode.ToString());
                             break;
                     }
 
@@ -122,7 +123,7 @@ namespace BookEpisodeScanner.Classes
         private async Task RunFoundEpisodeProcess()
         {
             logger.Log(String.Format("Episode of book found! Found BookID {0} EpisodeID {1} found at {2}", settings.BookId, settings.CurrentEpisodeId, DateTime.Now.ToString()));
-            EmailHelper.SendNotificationEmailBookFound(config, settings.BookId, settings.CurrentEpisodeId);
+            emailNotifier.SendNotificationEmailError(settings.BookId, settings.CurrentEpisodeId);
             await bot.PostMessage(String.Format("Episode of book found! Found BookID {0} EpisodeID {1} found at {2}", settings.BookId, settings.CurrentEpisodeId, DateTime.Now.ToString()));
             await PostBookTitleToBot(previousBookData, false);
 

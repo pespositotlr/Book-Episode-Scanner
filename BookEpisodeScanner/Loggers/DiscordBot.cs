@@ -1,27 +1,27 @@
 ﻿using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
-namespace BookEpisodeScanner
+namespace BookEpisodeScanner.Loggers
 {
     class DiscordBot
     {
         private DiscordSocketClient _client;
-        private IConfigurationRoot _config;
         private Logger logger;
+        private bool logToDiscord = false;
+        private string _discordToken;
+        private ulong _serverId;
+        private ulong _channelId;
 
         public DiscordBot(IConfigurationRoot config)
         {
-            _config = config;
-            logger = new Logger();
-            logger.localLogLocation = config["localLogLocation"];
+            _discordToken = config["discordToken"];
+            _serverId = Convert.ToUInt64(config["serverId"]);
+            _channelId = Convert.ToUInt64(config["generalChannelId"]);
+            logger = new Logger(config["localLogLocation"], Convert.ToBoolean(config["logToTextFile"]));
+            logToDiscord = Convert.ToBoolean(config["sendToDiscordBot"]);
         }
 
         public async Task LogToDiscord()
@@ -30,9 +30,7 @@ namespace BookEpisodeScanner
 
             _client.Log += Log;
 
-            var token = _config["discordToken"];
-
-            await _client.LoginAsync(Discord.TokenType.Bot, token);
+            await _client.LoginAsync(Discord.TokenType.Bot, _discordToken);
             await _client.StartAsync();
             await Task.Delay(3000);
         }
@@ -45,14 +43,14 @@ namespace BookEpisodeScanner
 
         public async Task PostMessage(string message)
         {
-            ulong serverid = Convert.ToUInt64(_config["serverId"]);
-            ulong channelId = Convert.ToUInt64(_config["generalChannelId"]);
+            if (!logToDiscord)
+                return;
 
             try
             {
-                var chnl = _client.GetGuild(serverid).GetTextChannel(channelId) as SocketTextChannel;
+                var chnl = _client.GetGuild(_serverId).GetTextChannel(_channelId) as SocketTextChannel;
                 await chnl.SendMessageAsync(message);
-            }catch (Exception ex)
+            } catch (Exception ex)
             {
                 Console.WriteLine("Failed to post to Discord." + ex.ToString());
             }

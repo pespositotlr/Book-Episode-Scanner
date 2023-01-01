@@ -13,6 +13,7 @@ using System.Globalization;
 using BookEpisodeScanner.Entities;
 using System.Threading;
 using Microsoft.Extensions.Configuration;
+using BookEpisodeScanner.Loggers;
 
 namespace BookEpisodeScanner.Utilities
 {
@@ -60,7 +61,8 @@ namespace BookEpisodeScanner.Utilities
             }
             catch (Exception ex)
             {
-                EmailHelper.SendNotificationEmailError(config, "GetTokenQueryString", ex.ToString());
+                EmailNotifier emailNotifier = new EmailNotifier(config);
+                emailNotifier.SendNotificationEmailError("GetTokenQueryString", ex.ToString());
             }
 
             return null;
@@ -80,8 +82,8 @@ namespace BookEpisodeScanner.Utilities
         {
             string urlToDownload = "";
             string downloadFolder = @config["localDownloadFolder"]; //Make sure this folder exists or an error will be thrown.
-            Logger logger = new Logger();
-            logger.localLogLocation = config["localLogLocation"];
+            var logger = new Logger(config["localLogLocation"], Convert.ToBoolean(config["logToTextFile"]));
+            var emailNotifier = new EmailNotifier(config);
             int errorCount = 0;
 
             using (WebClient client = new WebClient())
@@ -107,18 +109,17 @@ namespace BookEpisodeScanner.Utilities
                         {
                             logger.Log(String.Format("Error downloading page {0}. Current time is {1}. Error message: {1}", i, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.CurrentCulture), ex.ToString()));
                             logger.Log(String.Format("Trying again in 10 seconds.", i, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.CurrentCulture)));
-                            EmailHelper.SendNotificationEmailError(config, "DownloadPage", ex.ToString());
+                            emailNotifier.SendNotificationEmailError("DownloadPage", ex.ToString());
                             Thread.Sleep(10000);
                             i--;
                             errorCount++;
                         }
                     }
-
                 }
                 catch (Exception ex)
                 {
                     logger.Log(String.Format("Error in downloading book. Current time is {0}. Error: {1}", DateTime.Now.ToString(),ex.ToString()));
-                    EmailHelper.SendNotificationEmailError(config, "DownloadBook", ex.ToString());
+                    emailNotifier.SendNotificationEmailError("DownloadBook", ex.ToString());
                     errorCount++;
                 }
             }
