@@ -29,7 +29,7 @@ namespace BookEpisodeScanner.Utilities
             smtp.UseDefaultCredentials = false;
             smtp.EnableSsl = true;
             smtp.Credentials = new NetworkCredential(config["emailAddress"], config["emailAddressPassword"]);
-            smtp.Port = 587;
+            smtp.Port = Convert.ToInt32(config["smptPort"]);
             smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
             MailMessage msgMail = new MailMessage();
 
