@@ -11,6 +11,9 @@ using System.Threading.Tasks;
 
 namespace BookEpisodeScanner.Classes
 {
+    /// <summary>
+    /// Scans for the next episode of a book and downloads it when it is found
+    /// </summary>
     class Scanner
     {
         private ScannerSettings settings;

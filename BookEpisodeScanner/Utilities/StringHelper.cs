@@ -118,6 +118,17 @@ namespace BookEpisodeScanner.Utilities
 
             return String.Format("{0}{1}//{2}.jpg?{3}", bookData.GuardianServer, bookData.S3Key, pageNumber, bookData.AdditionalQueryString);
         }
+        public static string GetFirstEpisodeId(string bookId)
+        {
+            //The prefix is BT with 0s padded to 10 digits followed by bookid
+            //Then is number is the episode number twice (103)
+            //Followed by 01
+
+            string episodeIdPrefix = "BT" + GetPaddedZeroes(bookId) + bookId;
+            string episodeIdSuffix = "00100101";
+
+            return episodeIdPrefix + episodeIdSuffix;
+        }
 
     }
 }

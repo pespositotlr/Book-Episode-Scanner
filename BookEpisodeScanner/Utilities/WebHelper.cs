@@ -49,10 +49,13 @@ namespace BookEpisodeScanner.Utilities
                                 newBook.EpisodeId = episodeId;
                                 newBook.GuardianServer = responseObject.GUARDIAN_SERVER;
                                 newBook.AdditionalQueryString = responseObject.ADDITIONAL_QUERY_STRING;
-                                newBook.S3Key = responseObject.book_data.s3_key;
-                                newBook.Title = responseObject.book_data.title;
-                                newBook.Author = responseObject.book_data.author;
-                                newBook.PageCount = responseObject.book_data.page_count;
+                                if (responseObject.book_data != null)
+                                {
+                                    newBook.S3Key = responseObject.book_data.s3_key;
+                                    newBook.Title = responseObject.book_data.title;
+                                    newBook.Author = responseObject.book_data.author;
+                                    newBook.PageCount = responseObject.book_data.page_count;
+                                }
                                 return newBook;
                             }
                         }
