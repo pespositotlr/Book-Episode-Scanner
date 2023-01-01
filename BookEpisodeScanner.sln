@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30907.101
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BookEpisodeScanner", "BookEpisodeScanner\BookEpisodeScanner.csproj", "{2C352003-8476-427C-A8E6-8137B82D1A67}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2C352003-8476-427C-A8E6-8137B82D1A67}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C352003-8476-427C-A8E6-8137B82D1A67}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C352003-8476-427C-A8E6-8137B82D1A67}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C352003-8476-427C-A8E6-8137B82D1A67}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F8180F0A-044D-49B1-81A5-41061C99B80A}
+	EndGlobalSection
+EndGlobal
