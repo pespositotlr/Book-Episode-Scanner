@@ -127,5 +127,34 @@ namespace BookEpisodeScanner.Utilities
                 }
             }
         }
+
+        public static async Task DownloadURL(IConfigurationRoot config, string url)
+        {
+            string downloadFolder = @config["localDownloadFolder"]; //Make sure this folder exists or an error will be thrown.
+            var logger = new Logger(config["localLogLocation"], Convert.ToBoolean(config["logToTextFile"]));
+            var emailNotifier = new EmailNotifier(config);
+
+            using (WebClient client = new WebClient())
+            {
+                try
+                {
+                    try
+                    {
+                        logger.Log(String.Format("Downloading specific URL {0}. Current time is {1}", url, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.CurrentCulture)));
+                        await client.DownloadFileTaskAsync(new Uri(url), downloadFolder + DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss-fff", CultureInfo.CurrentCulture).ToString() + ".jpg");
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.Log(String.Format("Error in downloading url. Current time is {0}. Error: {1}", DateTime.Now.ToString(), ex.ToString()));
+                        emailNotifier.SendNotificationEmailError("DownloadURL", ex.ToString());
+                    }
+                }
+                catch (Exception ex)
+                {
+                    logger.Log(String.Format("Error in downloading url. Current time is {0}. Error: {1}", DateTime.Now.ToString(), ex.ToString()));
+                    emailNotifier.SendNotificationEmailError("DownloadURL", ex.ToString());
+                }
+            }
+        }
     }
 }

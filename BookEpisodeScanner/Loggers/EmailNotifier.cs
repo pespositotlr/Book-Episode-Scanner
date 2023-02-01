@@ -48,6 +48,15 @@ namespace BookEpisodeScanner.Loggers
             string body = "Successfully found episode " + currentEpisodeId + " of bookId " + bookId + ". It's currently being downloaded. The current time is: " + DateTime.Now.ToString();
             SendNotificationEmail(subject, body);
         }
+        public void SendNotificationUrlFound(string url)
+        {
+            if (!_isSendToEmailAddress)
+                return;
+
+            string subject = "Successfully found requested url";
+            string body = "Successfully found the url: " + url + " -- It's currently being downloaded. The current time is: " + DateTime.Now.ToString();
+            SendNotificationEmail(subject, body);
+        }
 
         private void SendNotificationEmail(string subject, string body)
         {
