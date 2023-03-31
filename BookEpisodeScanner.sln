@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30907.101
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BookEpisodeScanner", "BookEpisodeScanner\BookEpisodeScanner.csproj", "{2C352003-8476-427C-A8E6-8137B82D1A67}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataLayer", "DataLayer\DataLayer.csproj", "{BCE2D43E-32BE-4BCA-8C22-70FC0788A797}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{2C352003-8476-427C-A8E6-8137B82D1A67}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2C352003-8476-427C-A8E6-8137B82D1A67}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2C352003-8476-427C-A8E6-8137B82D1A67}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BCE2D43E-32BE-4BCA-8C22-70FC0788A797}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BCE2D43E-32BE-4BCA-8C22-70FC0788A797}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BCE2D43E-32BE-4BCA-8C22-70FC0788A797}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BCE2D43E-32BE-4BCA-8C22-70FC0788A797}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
