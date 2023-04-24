@@ -129,6 +129,21 @@ namespace BookEpisodeScanner.Utilities
 
             return episodeIdPrefix + episodeIdSuffix;
         }
+        public static int GetSequenceNumberFromEpisodeId(string episodeId)
+        {
+            string episodeIdPrefix = episodeId.Substring(0, 12);
+            string episodeIdSuffix = episodeId.Substring(episodeId.Length - 2);
+            string trimmedId = episodeId.Substring(episodeIdPrefix.Length);
+            trimmedId = trimmedId.Substring(0, trimmedId.LastIndexOf(episodeIdSuffix));
+            trimmedId = trimmedId.Substring(3);
+
+            if (Int32.TryParse(trimmedId, out int j))
+            {
+                return j;
+            }
+
+            return 0;
+        }
 
     }
 }

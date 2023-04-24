@@ -46,7 +46,7 @@ namespace BookEpisodeScanner.Classes
             done = false;
 
             bookToSearchFor = DatabaseAccessor.GetBookByBookID(settings.BookId);
-            if(bookToSearchFor == null)
+            if (bookToSearchFor.LookupValue == null)
             {
                 logger.Log(String.Format("Requested book {0} not found.", settings.BookId));
                 throw new Exception("Book not found.");
@@ -61,9 +61,12 @@ namespace BookEpisodeScanner.Classes
 
             var currentLatest = DatabaseAccessor.GetLatestEpisodeOfBook(settings.BookId);
 
-            if (currentLatest != null) {
+            if (currentLatest.LookupValue != null)
+            {
                 settings.CurrentEpisodeId = currentLatest.LookupValue;
-            } else { 
+            }
+            else
+            {
                 settings.CurrentEpisodeId = StringHelper.GetFirstEpisodeId(settings.BookId);
             }
 
@@ -74,28 +77,29 @@ namespace BookEpisodeScanner.Classes
             {
                 currentBookData = await WebHelper.GetBookData(config, settings.BookId, settings.CurrentEpisodeId);
 
-                if(currentBookData.S3Key == null && foundAnEpisode)
+                if (currentBookData.S3Key == null && foundAnEpisode)
                 {
                     //Found previous episode but did not find the current episode. That means the previous episode is the newest episode.
                     RunFoundNewestEpisodeProcess();
                     done = true;
-                } else
+                }
+                else
                 {
-                    if(logFailedAttempts)
+                    if (currentBookData.S3Key == null && logFailedAttempts)
                     {
-                        if (currentBookData.S3Key == null)
-                            logger.Log(String.Format("Did not find Book ID {0} Episode ID {1} on attempt {2} at {3}. Checking next id.", settings.BookId, settings.CurrentEpisodeId, attemptNumber, DateTime.Now.ToString()));
-                        else {
-                            foundAnEpisode = true;
-                            RunInsertEpisodeProcess(currentBookData, attemptNumber);
-                        }
+                        logger.Log(String.Format("Did not find Book ID {0} Episode ID {1} on attempt {2} at {3}. Checking next id.", settings.BookId, settings.CurrentEpisodeId, attemptNumber, DateTime.Now.ToString()));
+                    }
+                    else
+                    {
+                        foundAnEpisode = true;
+                        RunInsertEpisodeProcess(currentBookData, attemptNumber);
                     }
 
                     //Try next episode ID
                     settings.PreviousEpisodeId = settings.CurrentEpisodeId;
                     previousBookData = currentBookData;
                     settings.CurrentEpisodeId = StringHelper.GetCurrentEpisodeIdFromPreviousEpisodeId(settings.CurrentEpisodeId);
-                    
+
                     await Wait(settings.TimeBetweenAttemptsMilliseconds);
 
                     if (attemptNumber == settings.MaximumAttempts)
@@ -105,8 +109,8 @@ namespace BookEpisodeScanner.Classes
                     }
                     else
                         attemptNumber++;
-                                       
-                }                
+
+                }
             }
 
             logger.Log("All done!");
@@ -132,7 +136,7 @@ namespace BookEpisodeScanner.Classes
             logger.Log(String.Format("Found Book ID {0} Episode ID {1} on attempt {2} at {3}.", bookData.BookId, bookData.EpisodeId, attemptNumber, DateTime.Now.ToString()));
             //Check if episode is already in DB
             var existingEpisode = DatabaseAccessor.GetEpisodeByEpisodeID(bookData.BookId);
-            if (existingEpisode != null)
+            if (existingEpisode.LookupValue != null)
             {
                 logger.Log(String.Format("This episode was already in the databse, so now checking next episode."));
                 return;
@@ -145,6 +149,7 @@ namespace BookEpisodeScanner.Classes
                 Name = bookData.Title,
                 LookupValue = bookData.EpisodeId,
                 IsDownloaded = false,
+                SequenceNumber = StringHelper.GetSequenceNumberFromEpisodeId(bookData.EpisodeId)
             };
 
             DatabaseAccessor.InsertEpisode(episodeToInsert);

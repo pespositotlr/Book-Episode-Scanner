@@ -7,7 +7,7 @@ namespace DataLayer.Accessors
 {
     public static class DatabaseAccessor
     {
-        private const string _connectionString = "Data Source=BookEpisodeDB.db; Version = 3; Compress = true";
+        private const string _connectionString = "Data Source=..\\..\\..\\..\\DataLayer\\BookEpisodeDB.db; Version = 3; Compress = true";
 
         public static List<Book> GetBooks()
         {
@@ -32,12 +32,14 @@ namespace DataLayer.Accessors
                         });
                     }
                 }
+                connection.Close();
             }
             return books;
         }
         public static Book GetBookByBookID(string lookupValue)
         {
             Book book = new Book();
+            Console.WriteLine(Environment.CurrentDirectory);
             using (SQLiteConnection connection = new SQLiteConnection(_connectionString))
             {
                 connection.Open();
@@ -62,6 +64,7 @@ namespace DataLayer.Accessors
                         };
                     }
                 }
+                connection.Close();
             }
             return book;
         }
@@ -94,6 +97,7 @@ namespace DataLayer.Accessors
                         };
                     }
                 }
+                connection.Close();
             }
             return book;
         }
@@ -131,9 +135,11 @@ namespace DataLayer.Accessors
                             };
                         }
                     }
+                    connection.Close();
                 }
                 return episode;
-            } catch
+            }
+            catch
             {
                 return episode;
             }
@@ -155,7 +161,7 @@ namespace DataLayer.Accessors
 
                     command.Parameters.AddWithValue("@bookName", bookName);
                     command.Prepare();
-                    
+
                     SQLiteDataReader reader = command.ExecuteReader();
                     while (reader.Read())
                     {
@@ -171,6 +177,7 @@ namespace DataLayer.Accessors
                         });
                     }
                 }
+                connection.Close();
             }
             return episodes;
         }
@@ -194,6 +201,7 @@ namespace DataLayer.Accessors
 
                         command.ExecuteNonQuery();
                     }
+                    connection.Close();
                 }
                 return true;
             }
@@ -212,15 +220,19 @@ namespace DataLayer.Accessors
                     connection.Open();
                     using (SQLiteCommand command = connection.CreateCommand())
                     {
-                        command.CommandText = "INSERT INTO Episode (BookID, Name, LookupValue, IsDownloaded) VALUES(@BookID, @Name, @LookupValue, @IsDownloaded)";
+                        command.CommandText = "INSERT INTO Episode (BookID, Name, LookupValue, IsDownloaded, SequenceNumber) VALUES(@BookID, @Name, @LookupValue, @IsDownloaded, @SequenceNumber)";
+                        command.CommandType = CommandType.Text;
 
                         command.Parameters.AddWithValue("@BookID", episode.BookID);
                         command.Parameters.AddWithValue("@Name", episode.Name);
                         command.Parameters.AddWithValue("@LookupValue", episode.LookupValue);
                         command.Parameters.AddWithValue("@IsDownloaded", episode.IsDownloaded);
+                        command.Parameters.AddWithValue("@SequenceNumber", episode.SequenceNumber);
+                        command.Prepare();
 
                         command.ExecuteNonQuery();
                     }
+                    connection.Close();
                 }
                 return true;
             }
@@ -238,11 +250,12 @@ namespace DataLayer.Accessors
                 connection.Open();
                 using (SQLiteCommand command = connection.CreateCommand())
                 {
-                    command.CommandText = @"SELECT TOP 1 e.ID, e.BookID, e.Name, e.LookupValue, e.IsDownloaded, e.DateCreated 
+                    command.CommandText = @"SELECT e.ID, e.BookID, e.Name, e.LookupValue, e.IsDownloaded, e.DateCreated 
                                         FROM Episode e 
                                         INNER JOIN Book b ON e.BookID = b.ID
                                         WHERE b.Name = @bookName
-                                        ORDER BY e.DateCreated DESC";
+                                        ORDER BY e.DateCreated DESC
+                                        LIMIT 1";
 
                     command.CommandType = CommandType.Text;
 
@@ -264,6 +277,7 @@ namespace DataLayer.Accessors
                         };
                     }
                 }
+                connection.Close();
             }
             return episode;
         }

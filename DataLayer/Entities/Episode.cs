@@ -14,5 +14,6 @@ namespace DataLayer.Entities
         public string? LookupValue { get; set; }
         public bool IsDownloaded { get; set; }
         public DateTime? DateCreated { get; set; }
+        public int SequenceNumber { get; set; }
     }
 }
