@@ -236,13 +236,13 @@ namespace DataLayer.Accessors
                 }
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
                 return false;
             }
         }
 
-        public static Episode GetLatestEpisodeOfBook(string bookName)
+        public static Episode GetLatestEpisodeOfBookByBookID(string lookupValue)
         {
             Episode episode = new Episode();
             using (SQLiteConnection connection = new SQLiteConnection(_connectionString))
@@ -253,13 +253,13 @@ namespace DataLayer.Accessors
                     command.CommandText = @"SELECT e.ID, e.BookID, e.Name, e.LookupValue, e.IsDownloaded, e.DateCreated 
                                         FROM Episode e 
                                         INNER JOIN Book b ON e.BookID = b.ID
-                                        WHERE b.Name = @bookName
+                                        WHERE b.LookupValue = @lookupValue
                                         ORDER BY e.DateCreated DESC
                                         LIMIT 1";
 
                     command.CommandType = CommandType.Text;
 
-                    command.Parameters.AddWithValue("@bookName", bookName);
+                    command.Parameters.AddWithValue("@lookupValue", lookupValue);
                     command.Prepare();
 
                     SQLiteDataReader reader = command.ExecuteReader();
@@ -281,6 +281,5 @@ namespace DataLayer.Accessors
             }
             return episode;
         }
-
     }
 }
