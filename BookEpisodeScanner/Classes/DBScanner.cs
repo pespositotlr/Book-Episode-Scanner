@@ -65,7 +65,7 @@ namespace BookEpisodeScanner.Classes
             settings.MaximumPagesToDownload = maximumPagesToDownload;
             settings.MaximumAttempts = maximumAttempts;
             settings.TimeBetweenAttemptsMilliseconds = timeBetweenAttemptsMilliseconds;
-            logFailedAttempts = false; //Don't log failed attempts to save time
+            logFailedAttempts = true; //Don't log failed attempts to save time
             done = false;
         }
 
@@ -213,8 +213,8 @@ namespace BookEpisodeScanner.Classes
             var currentLatest = DatabaseAccessor.GetLatestEpisodeOfBookByBookID(settings.BookId);
             var foundAnEpisode = false;
             var doneFindingNewestEpisode = false;
-            var attempts = 1;
-            var timeToWaitBetweenReleasedAttempts = 3000;
+            var getNewestEpisodeAttempts = 1;
+            var timeToWaitBetweenReleasedAttempts = 500;
 
             if (currentLatest.LookupValue != null)
             {
@@ -243,16 +243,24 @@ namespace BookEpisodeScanner.Classes
                     if (currentBookData.S3Key == null)
                     {
                         if (logFailedAttempts)
-                            logger.Log(String.Format("Did not find Book ID {0} Episode ID {1} on attempt {2} at {3}. Checking next id.", settings.BookId, settings.CurrentEpisodeId, attemptNumber, DateTime.Now.ToString()));
+                            logger.Log(String.Format("Did not find Book ID {0} Episode ID {1} on attempt {2} at {3}. Checking next id.", settings.BookId, settings.CurrentEpisodeId, getNewestEpisodeAttempts, DateTime.Now.ToString()));
                     }
                     else
                     {
                         foundAnEpisode = true;
+                        logger.Log(String.Format("FOUND Book ID {0} Episode ID {1} on attempt {2} at {3}. Inserting this episode into the databse.", settings.BookId, settings.CurrentEpisodeId, getNewestEpisodeAttempts, DateTime.Now.ToString()));
+
+                        var databaseBook = DatabaseAccessor.GetBookByBookID(settings.BookId);
+                        if (databaseBook.LookupValue == null)
+                        {
+                            logger.Log(String.Format("Requested book {0} not found.", settings.BookId));
+                            throw new Exception("Book not found.");
+                        }
 
                         //Insert this found episode into the database
                         var episodeToInsert = new DataLayer.Entities.Episode()
                         {
-                            BookID = Convert.ToInt32(currentBookData.BookId),
+                            BookID = databaseBook.ID,
                             Name = currentBookData.Title,
                             LookupValue = currentBookData.EpisodeId,
                             IsDownloaded = false,
@@ -270,13 +278,13 @@ namespace BookEpisodeScanner.Classes
 
                     await Wait(timeToWaitBetweenReleasedAttempts);
 
-                    if (attempts == settings.MaximumAttempts)
+                    if (getNewestEpisodeAttempts == settings.MaximumAttempts)
                     {
                         doneFindingNewestEpisode = true;
                         logger.Log(String.Format("Did not find the newest episode ID for Book Id {0} in {1} attempts. The maximum attempts value may be too small, this book may have no episodes, or you started from an Episode ID that is past the newest episode.", settings.BookId, attemptNumber));
                     }
                     else
-                        attempts++;
+                        getNewestEpisodeAttempts++;
 
                 }
 
