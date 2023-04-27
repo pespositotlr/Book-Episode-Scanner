@@ -20,7 +20,7 @@ namespace BookEpisodeScanner.Utilities
     public static class WebHelper
     {
 
-        public async static Task<BookData> GetBookData(IConfigurationRoot config, string bookId, string episodeId)
+        public async static Task<BookServerData> GetBookData(IConfigurationRoot config, string bookId, string episodeId)
         {
             string WEBSERVICE_URL = String.Format("{0}?book_id={1}&episode_id={2}", config["webserviceURLRoot"], bookId, episodeId);
 
@@ -44,7 +44,7 @@ namespace BookEpisodeScanner.Utilities
                             {
                                 var jsonResponse = sr.ReadToEnd();
                                 dynamic responseObject = JsonConvert.DeserializeObject(jsonResponse);
-                                BookData newBook = new BookData();
+                                BookServerData newBook = new BookServerData();
                                 newBook.BookId = bookId;
                                 newBook.EpisodeId = episodeId;
                                 newBook.GuardianServer = responseObject.GUARDIAN_SERVER;

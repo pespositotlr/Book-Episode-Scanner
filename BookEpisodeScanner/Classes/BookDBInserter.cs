@@ -22,7 +22,7 @@ namespace BookEpisodeScanner.Classes
         IConfigurationRoot config;
         Logger logger;
         private ScannerSettings settings;
-        private BookData currentBookData;
+        private BookServerData currentBookData;
         int attemptNumber = 0;
         string bookTitle;
         bool done;
@@ -49,7 +49,7 @@ namespace BookEpisodeScanner.Classes
         {
             DateTime.Now.ToString();
             //First check if book already exists by bookID
-            Book existingBook = DatabaseAccessor.GetBookByBookID(settings.BookId);
+            DBBook existingBook = DatabaseAccessor.GetBookByBookID(settings.BookId);
             if (!String.IsNullOrEmpty(existingBook.LookupValue))
             {
                 logger.Log(String.Format("Requested book {0} is already in database.", settings.BookId));
@@ -97,7 +97,7 @@ namespace BookEpisodeScanner.Classes
                     if(index > 0)
                         title = currentBookData.Title.Substring(0, index);
 
-                    var bookToInsert = new Book()
+                    var bookToInsert = new DBBook()
                     {
                         Name = title,
                         LookupValue = currentBookData.BookId,

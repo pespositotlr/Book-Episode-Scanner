@@ -21,7 +21,7 @@ namespace BookEpisodeScanner.Classes
         IConfigurationRoot config;
         Logger logger;
         EmailNotifier emailNotifier;
-        BookData previousBookData;
+        BookServerData previousBookData;
         //BookData currentBookData;
         int attemptNumber;
         bool done;
@@ -29,8 +29,8 @@ namespace BookEpisodeScanner.Classes
         string finalImageUrl;
         string tokenQueryString;
         bool logFailedAttempts;
-        Book bookToSearch;
-        Episode latestEpisode;
+        DBBook bookToSearch;
+        DBEpisode latestEpisode;
 
         public DBScanner(string bookId = "", int maximumPagesToDownload = 1200, int maximumAttempts = 100000, int timeBetweenAttemptsMilliseconds = 600000)
         {
@@ -122,7 +122,7 @@ namespace BookEpisodeScanner.Classes
                         case HttpStatusCode.Forbidden:
                             //The token expired so go get a new one
                             logger.Log(String.Format("Got 403 forbidden error. Fetching new token. Current time is: {0}", DateTime.Now.ToString()));
-                            BookData bookData = await WebHelper.GetBookData(config, settings.BookId, settings.PreviousEpisodeId);
+                            BookServerData bookData = await WebHelper.GetBookData(config, settings.BookId, settings.PreviousEpisodeId);
                             tokenQueryString = bookData.AdditionalQueryString;
                             previewImageUrl = StringHelper.GetPreviewVersionImageUrl(config["imageBaseURL"], settings.BookId, settings.CurrentEpisodeId, settings.MiddleId, tokenQueryString);
                             break;
@@ -182,7 +182,7 @@ namespace BookEpisodeScanner.Classes
             return;
         }
 
-        private async Task PostBookTitleToBot(BookData bookData, bool isNew = true)
+        private async Task PostBookTitleToBot(BookServerData bookData, bool isNew = true)
         {
             if (bookData != null)
             {
@@ -207,7 +207,7 @@ namespace BookEpisodeScanner.Classes
             }
         }
 
-        private async Task<BookData> GetNewestReleasedEpisodeBookData()
+        private async Task<BookServerData> GetNewestReleasedEpisodeBookData()
         {
             //Get latest episode in the database
             var currentLatest = DatabaseAccessor.GetLatestEpisodeOfBookByBookID(settings.BookId);
@@ -226,7 +226,7 @@ namespace BookEpisodeScanner.Classes
             }
 
             //Check data for this episode
-            BookData currentBookData = null;
+            BookServerData currentBookData = null;
 
             while (!doneFindingNewestEpisode)
             {
@@ -258,7 +258,7 @@ namespace BookEpisodeScanner.Classes
                         }
 
                         //Insert this found episode into the database
-                        var episodeToInsert = new DataLayer.Entities.Episode()
+                        var episodeToInsert = new DataLayer.Entities.DBEpisode()
                         {
                             BookID = databaseBook.ID,
                             Name = currentBookData.Title,

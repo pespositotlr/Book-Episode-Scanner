@@ -19,8 +19,8 @@ namespace BookEpisodeScanner.Classes
         private ScannerSettings settings;
         IConfigurationRoot config;
         Logger logger;
-        BookData previousBookData;
-        BookData currentBookData;
+        BookServerData previousBookData;
+        BookServerData currentBookData;
         int attemptNumber;
         bool logFailedAttempts;
         bool foundAnEpisode;

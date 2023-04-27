@@ -9,9 +9,9 @@ namespace DataLayer.Accessors
     {
         private const string _connectionString = "Data Source=..\\..\\..\\..\\DataLayer\\BookEpisodeDB.db; Version = 3; Compress = true";
 
-        public static List<Book> GetBooks()
+        public static List<DBBook> GetBooks()
         {
-            List<Book> books = new List<Book>();
+            List<DBBook> books = new List<DBBook>();
             using (SQLiteConnection connection = new SQLiteConnection(_connectionString))
             {
                 connection.Open();
@@ -23,7 +23,7 @@ namespace DataLayer.Accessors
                     while (reader.Read())
                     {
                         var resultRow = Enumerable.Range(0, reader.FieldCount).ToDictionary(reader.GetName, reader.GetValue);
-                        books.Add(new Book()
+                        books.Add(new DBBook()
                         {
                             ID = Convert.ToInt32(resultRow["ID"]),
                             Name = Convert.ToString(resultRow["Name"]),
@@ -36,9 +36,9 @@ namespace DataLayer.Accessors
             }
             return books;
         }
-        public static Book GetBookByBookID(string lookupValue)
+        public static DBBook GetBookByBookID(string lookupValue)
         {
-            Book book = new Book();
+            DBBook book = new DBBook();
             Console.WriteLine(Environment.CurrentDirectory);
             using (SQLiteConnection connection = new SQLiteConnection(_connectionString))
             {
@@ -55,7 +55,7 @@ namespace DataLayer.Accessors
                     while (reader.Read())
                     {
                         var resultRow = Enumerable.Range(0, reader.FieldCount).ToDictionary(reader.GetName, reader.GetValue);
-                        book = new Book()
+                        book = new DBBook()
                         {
                             ID = Convert.ToInt32(resultRow["ID"]),
                             Name = Convert.ToString(resultRow["Name"]),
@@ -70,9 +70,9 @@ namespace DataLayer.Accessors
         }
 
 
-        public static Book GetBookByName(string name)
+        public static DBBook GetBookByName(string name)
         {
-            Book book = new Book();
+            DBBook book = new DBBook();
             using (SQLiteConnection connection = new SQLiteConnection(_connectionString))
             {
                 connection.Open();
@@ -88,7 +88,7 @@ namespace DataLayer.Accessors
                     while (reader.Read())
                     {
                         var resultRow = Enumerable.Range(0, reader.FieldCount).ToDictionary(reader.GetName, reader.GetValue);
-                        book = new Book()
+                        book = new DBBook()
                         {
                             ID = Convert.ToInt32(resultRow["ID"]),
                             Name = Convert.ToString(resultRow["Name"]),
@@ -102,9 +102,9 @@ namespace DataLayer.Accessors
             return book;
         }
 
-        public static Episode GetEpisodeByEpisodeID(string lookupValue)
+        public static DBEpisode GetEpisodeByEpisodeID(string lookupValue)
         {
-            Episode episode = new Episode();
+            DBEpisode episode = new DBEpisode();
             try
             {
                 using (SQLiteConnection connection = new SQLiteConnection(_connectionString))
@@ -124,7 +124,7 @@ namespace DataLayer.Accessors
                         while (reader.Read())
                         {
                             var resultRow = Enumerable.Range(0, reader.FieldCount).ToDictionary(reader.GetName, reader.GetValue);
-                            episode = new Episode()
+                            episode = new DBEpisode()
                             {
                                 ID = Convert.ToInt32(resultRow["ID"]),
                                 BookID = Convert.ToInt32(resultRow["BookID"]),
@@ -145,9 +145,9 @@ namespace DataLayer.Accessors
             }
         }
 
-        public static List<Episode> GetEpisodesByBookName(string bookName)
+        public static List<DBEpisode> GetEpisodesByBookName(string bookName)
         {
-            List<Episode> episodes = new List<Episode>();
+            List<DBEpisode> episodes = new List<DBEpisode>();
             using (SQLiteConnection connection = new SQLiteConnection(_connectionString))
             {
                 connection.Open();
@@ -166,7 +166,7 @@ namespace DataLayer.Accessors
                     while (reader.Read())
                     {
                         var resultRow = Enumerable.Range(0, reader.FieldCount).ToDictionary(reader.GetName, reader.GetValue);
-                        episodes.Add(new Episode()
+                        episodes.Add(new DBEpisode()
                         {
                             ID = Convert.ToInt32(resultRow["ID"]),
                             BookID = Convert.ToInt32(resultRow["BookID"]),
@@ -182,7 +182,7 @@ namespace DataLayer.Accessors
             return episodes;
         }
 
-        public static bool InsertBook(Book book)
+        public static bool InsertBook(DBBook book)
         {
             try
             {
@@ -211,7 +211,7 @@ namespace DataLayer.Accessors
             }
         }
 
-        public static bool InsertEpisode(Episode episode)
+        public static bool InsertEpisode(DBEpisode episode)
         {
             try
             {
@@ -242,9 +242,9 @@ namespace DataLayer.Accessors
             }
         }
 
-        public static Episode GetLatestEpisodeOfBookByBookID(string lookupValue)
+        public static DBEpisode GetLatestEpisodeOfBookByBookID(string lookupValue)
         {
-            Episode episode = new Episode();
+            DBEpisode episode = new DBEpisode();
             using (SQLiteConnection connection = new SQLiteConnection(_connectionString))
             {
                 connection.Open();
@@ -266,7 +266,7 @@ namespace DataLayer.Accessors
                     while (reader.Read())
                     {
                         var resultRow = Enumerable.Range(0, reader.FieldCount).ToDictionary(reader.GetName, reader.GetValue);
-                        episode = new Episode()
+                        episode = new DBEpisode()
                         {
                             ID = Convert.ToInt32(resultRow["ID"]),
                             BookID = Convert.ToInt32(resultRow["BookID"]),

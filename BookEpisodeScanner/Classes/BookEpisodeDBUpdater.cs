@@ -21,9 +21,9 @@ namespace BookEpisodeScanner.Classes
         private ScannerSettings settings;
         IConfigurationRoot config;
         Logger logger;
-        BookData previousBookData;
-        BookData currentBookData;
-        Book bookToSearchFor;
+        BookServerData previousBookData;
+        BookServerData currentBookData;
+        DBBook bookToSearchFor;
         int attemptNumber;
         bool logFailedAttempts;
         bool foundAnEpisode;
@@ -131,7 +131,7 @@ namespace BookEpisodeScanner.Classes
             return;
         }
 
-        private void RunInsertEpisodeProcess(BookData bookData, int attemptNumber)
+        private void RunInsertEpisodeProcess(BookServerData bookData, int attemptNumber)
         {
             logger.Log(String.Format("Found Book ID {0} Episode ID {1} on attempt {2} at {3}.", bookData.BookId, bookData.EpisodeId, attemptNumber, DateTime.Now.ToString()));
             //Check if episode is already in DB
@@ -143,7 +143,7 @@ namespace BookEpisodeScanner.Classes
             }
 
             //If not, insert into DB
-            var episodeToInsert = new Episode()
+            var episodeToInsert = new DBEpisode()
             {
                 BookID = bookToSearchFor.ID,
                 Name = bookData.Title,

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace BookEpisodeScanner.Entities
 {
-    public class BookData
+    public class BookServerData
     {
         public string BookId { get; set; }
         public string EpisodeId { get; set; }

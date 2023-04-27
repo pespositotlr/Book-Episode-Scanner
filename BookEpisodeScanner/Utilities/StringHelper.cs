@@ -47,7 +47,7 @@ namespace BookEpisodeScanner.Utilities
             return sourceLanguageAuthor;
         }
 
-        public static string GetMiddleIDFromS3Key(BookData bookData)
+        public static string GetMiddleIDFromS3Key(BookServerData bookData)
         {
             int episodeIdIndex = bookData.S3Key.LastIndexOf(bookData.EpisodeId);
 
@@ -59,7 +59,7 @@ namespace BookEpisodeScanner.Utilities
         {
             return GetImageUrl(baseURL, bookId, episodeId, middleId, tokenQueryString, pageNumber, false);
         }
-        public static string GetPreviewVersionImageUrl(BookData bookData, int pageNumber = 1)
+        public static string GetPreviewVersionImageUrl(BookServerData bookData, int pageNumber = 1)
         {
             return GetImageUrl(bookData, pageNumber, false);
         }
@@ -69,7 +69,7 @@ namespace BookEpisodeScanner.Utilities
             return GetImageUrl(baseURL, bookId, episodeId, middleId, tokenQueryString, pageNumber, true);
         }
 
-        public static string GetFullVersionImageUrl(BookData bookData, int pageNumber = 1)
+        public static string GetFullVersionImageUrl(BookServerData bookData, int pageNumber = 1)
         {
             return GetImageUrl(bookData, pageNumber, true);
         }
@@ -106,7 +106,7 @@ namespace BookEpisodeScanner.Utilities
             return zeroesBuilder.ToString();
         }
 
-        private static string GetImageUrl(BookData bookData, int pageNumber = 1, bool isFullVersion = false)
+        private static string GetImageUrl(BookServerData bookData, int pageNumber = 1, bool isFullVersion = false)
         {
             //Full version has _001 in the end of the url rather than _000 in the preview version
             if (isFullVersion)

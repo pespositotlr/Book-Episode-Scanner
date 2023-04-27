@@ -21,7 +21,7 @@ namespace BookEpisodeScanner.Classes
         IConfigurationRoot config;
         Logger logger;
         EmailNotifier emailNotifier;
-        BookData previousBookData;
+        BookServerData previousBookData;
         int attemptNumber;
         bool done;
         string previewImageUrl;
@@ -87,7 +87,7 @@ namespace BookEpisodeScanner.Classes
                         case HttpStatusCode.Forbidden:
                             //The token expired so go get a new one
                             logger.Log(String.Format("Got 403 forbidden error. Fetching new token. Current time is: {0}", DateTime.Now.ToString()));
-                            BookData bookData = await WebHelper.GetBookData(config, settings.BookId, settings.PreviousEpisodeId);
+                            BookServerData bookData = await WebHelper.GetBookData(config, settings.BookId, settings.PreviousEpisodeId);
                             tokenQueryString = bookData.AdditionalQueryString;
                             previewImageUrl = StringHelper.GetPreviewVersionImageUrl(config["imageBaseURL"], settings.BookId, settings.CurrentEpisodeId, settings.MiddleId, tokenQueryString);
                             break;
@@ -147,7 +147,7 @@ namespace BookEpisodeScanner.Classes
             return;
         }
 
-        private async Task PostBookTitleToBot(BookData bookData, bool isNew = true)
+        private async Task PostBookTitleToBot(BookServerData bookData, bool isNew = true)
         {
             if (bookData != null)
             {
