@@ -59,7 +59,7 @@ namespace BookEpisodeScanner.Classes
             TimeSpan t = TimeSpan.FromMilliseconds(settings.TimeBetweenAttemptsMilliseconds);
             string timeBetweenAttemptsString = t.Minutes.ToString();
 
-            var currentLatest = DatabaseAccessor.GetLatestEpisodeOfBook(settings.BookId);
+            var currentLatest = DatabaseAccessor.GetLatestEpisodeOfBookByBookID(settings.BookId);
 
             if (currentLatest.LookupValue != null)
             {

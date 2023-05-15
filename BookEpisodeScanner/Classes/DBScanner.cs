@@ -73,8 +73,6 @@ namespace BookEpisodeScanner.Classes
         {
             //First find the newest release episode and then run the scan for the next one
             await bot.LogToDiscord();
-            TimeSpan t = TimeSpan.FromMilliseconds(settings.TimeBetweenAttemptsMilliseconds);
-            string timeBetweenAttemptsString = t.Minutes.ToString();
 
             var newestReleasedEpisode = await GetNewestReleasedEpisodeBookData();
 
@@ -102,8 +100,9 @@ namespace BookEpisodeScanner.Classes
 
         private async Task ScanForEpisode()
         {
-
             attemptNumber = 1;
+            TimeSpan t = TimeSpan.FromMilliseconds(settings.TimeBetweenAttemptsMilliseconds);
+            string timeBetweenAttemptsString = t.Minutes.ToString();
 
             while (!done)
             {
