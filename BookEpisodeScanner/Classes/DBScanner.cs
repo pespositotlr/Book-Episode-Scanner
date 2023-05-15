@@ -71,8 +71,8 @@ namespace BookEpisodeScanner.Classes
 
         public async Task GetNewestEpisode()
         {
+            //First find the newest release episode and then run the scan for the next one
             await bot.LogToDiscord();
-            attemptNumber = 1;
             TimeSpan t = TimeSpan.FromMilliseconds(settings.TimeBetweenAttemptsMilliseconds);
             string timeBetweenAttemptsString = t.Minutes.ToString();
 
@@ -94,6 +94,16 @@ namespace BookEpisodeScanner.Classes
 
             //Searching for the episode AFTER the last released episode
             logger.Log(String.Format("Attempting to get episode following: EpisodeID: {0}", settings.CurrentEpisodeId));
+            
+            await ScanForEpisode();
+
+            return;
+        }
+
+        private async Task ScanForEpisode()
+        {
+
+            attemptNumber = 1;
 
             while (!done)
             {
@@ -103,7 +113,7 @@ namespace BookEpisodeScanner.Classes
                 {
                     previewImageUrl = StringHelper.GetPreviewVersionImageUrl(config["imageBaseURL"], settings.BookId, settings.CurrentEpisodeId, bookToSearch.MiddleID, tokenQueryString);
 
-                    logger.Log(previewImageUrl);
+                    logger.Log(previewImageUrl.Replace("//", "/"));
 
                     HttpStatusCode currentStatusCode = await WebHelper.GetUrlStatusCode(previewImageUrl);
 
@@ -149,8 +159,6 @@ namespace BookEpisodeScanner.Classes
 
             if (done)
                 logger.Log("All done!");
-
-            return;
         }
 
         private async Task Wait(int milliseconds)
@@ -176,6 +184,25 @@ namespace BookEpisodeScanner.Classes
                 await Wait(60000);
                 fullVersionStatusCode = await WebHelper.GetUrlStatusCode(finalImageUrl);
             }
+
+            var databaseBook = DatabaseAccessor.GetBookByBookID(settings.BookId);
+            if (databaseBook.LookupValue == null)
+            {
+                logger.Log(String.Format("Requested book {0} not found.", settings.BookId));
+                throw new Exception("Book not found.");
+            }
+
+            //Use "The episode following" because the currentbookdata isn't up yet
+            var episodeToInsert = new DataLayer.Entities.DBEpisode()
+            {
+                BookID = databaseBook.ID,
+                Name = "The episode following: " + previousBookData.Title,
+                LookupValue = settings.CurrentEpisodeId,
+                IsDownloaded = true,
+                SequenceNumber = StringHelper.GetSequenceNumberFromEpisodeId(settings.CurrentEpisodeId)
+            };
+
+            DatabaseAccessor.InsertEpisode(episodeToInsert);
 
             //Will download either the maximum pages to download or when there's no pages left in the episode, whichever comes first.
             await WebHelper.DownloadBookEpisode(config, settings.BookId, settings.CurrentEpisodeId, settings.MiddleId, tokenQueryString, settings.MaximumPagesToDownload);
