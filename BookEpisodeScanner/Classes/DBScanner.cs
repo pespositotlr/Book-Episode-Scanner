@@ -92,7 +92,11 @@ namespace BookEpisodeScanner.Classes
 
             //Searching for the episode AFTER the last released episode
             logger.Log(String.Format("Attempting to get episode following: EpisodeID: {0}", settings.CurrentEpisodeId));
-            
+
+            previewImageUrl = StringHelper.GetPreviewVersionImageUrl(config["imageBaseURL"], settings.BookId, settings.CurrentEpisodeId, bookToSearch.MiddleID, tokenQueryString);
+
+            logger.Log(previewImageUrl.Replace("//", "/"));
+
             await ScanForEpisode();
 
             return;
@@ -111,8 +115,6 @@ namespace BookEpisodeScanner.Classes
                 try
                 {
                     previewImageUrl = StringHelper.GetPreviewVersionImageUrl(config["imageBaseURL"], settings.BookId, settings.CurrentEpisodeId, bookToSearch.MiddleID, tokenQueryString);
-
-                    logger.Log(previewImageUrl.Replace("//", "/"));
 
                     HttpStatusCode currentStatusCode = await WebHelper.GetUrlStatusCode(previewImageUrl);
 
@@ -134,6 +136,7 @@ namespace BookEpisodeScanner.Classes
                             BookServerData bookData = await WebHelper.GetBookData(config, settings.BookId, settings.PreviousEpisodeId);
                             tokenQueryString = bookData.AdditionalQueryString;
                             previewImageUrl = StringHelper.GetPreviewVersionImageUrl(config["imageBaseURL"], settings.BookId, settings.CurrentEpisodeId, settings.MiddleId, tokenQueryString);
+                            logger.Log(previewImageUrl.Replace("//", "/")); 
                             break;
                         default:
                             //Email that we somehow got some other error
