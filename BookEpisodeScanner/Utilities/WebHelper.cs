@@ -84,10 +84,16 @@ namespace BookEpisodeScanner.Utilities
         public static async Task DownloadBookEpisode(IConfigurationRoot config, string bookId, string episodeId, string middleId, string tokenQueryString, int pagesToDownload)
         {
             string urlToDownload = "";
-            string downloadFolder = @config["localDownloadFolder"]; //Make sure this folder exists or an error will be thrown.
+            string downloadFolder = @config["localDownloadFolder"] + "/" + episodeId + "/"; //Make sure this folder exists or an error will throw. Outputs in ###.jpg format.
             var logger = new Logger(config["localLogLocation"], Convert.ToBoolean(config["logToTextFile"]));
             var emailNotifier = new EmailNotifier(config);
             int errorCount = 0;
+
+            //Create folder based on episodeId if it doesn't exist
+            if (!Directory.Exists(downloadFolder))
+            {
+                Directory.CreateDirectory(downloadFolder);
+            }
 
             using (WebClient client = new WebClient())
             {
