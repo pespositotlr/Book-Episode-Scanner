@@ -32,7 +32,7 @@ namespace BookEpisodeScanner.Classes
         DBBook bookToSearch;
         DBEpisode latestEpisode;
 
-        public DBScanner(string bookId = "", int maximumPagesToDownload = 1200, int maximumAttempts = 100000, int timeBetweenAttemptsMilliseconds = 600000)
+        public DBScanner(string bookId = "", int maximumPagesToDownload = 700, int maximumAttempts = 100000, int timeBetweenAttemptsMilliseconds = 600000)
         {
             settings = new ScannerSettings();
             var builder = new ConfigurationBuilder()

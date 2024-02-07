@@ -29,7 +29,8 @@ namespace BookEpisodeScanner.Classes
         string tokenQueryString;
 
         public Scanner(string bookId = "", string previousEpisodeId = "", string middleId = "", 
-            int maximumPagesToDownload = 900, int maximumAttempts = 100000, int timeBetweenAttemptsMilliseconds = 600000)
+            int maximumPagesToDownload = 900, int maximumAttempts = 100000, int timeBetweenAttemptsMilliseconds = 600000,
+            bool downloadPreviousEpisodeId = false)
         {
             settings = new ScannerSettings();
             var builder = new ConfigurationBuilder()
@@ -41,8 +42,8 @@ namespace BookEpisodeScanner.Classes
             bot = new DiscordBot(config);
 
             settings.BookId = bookId;
-            settings.PreviousEpisodeId = previousEpisodeId; 
-            settings.CurrentEpisodeId = StringHelper.GetCurrentEpisodeIdFromPreviousEpisodeId(settings.PreviousEpisodeId);
+            settings.PreviousEpisodeId = previousEpisodeId;
+            settings.CurrentEpisodeId = downloadPreviousEpisodeId ? previousEpisodeId : StringHelper.GetCurrentEpisodeIdFromPreviousEpisodeId(settings.PreviousEpisodeId);
             settings.MiddleId = middleId;
             settings.MaximumPagesToDownload = maximumPagesToDownload;
             settings.MaximumAttempts = maximumAttempts;

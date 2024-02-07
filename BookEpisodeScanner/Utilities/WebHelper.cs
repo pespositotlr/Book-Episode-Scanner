@@ -81,13 +81,15 @@ namespace BookEpisodeScanner.Utilities
             }
         }
 
-        public static async Task DownloadBookEpisode(IConfigurationRoot config, string bookId, string episodeId, string middleId, string tokenQueryString, int pagesToDownload)
+        public static async Task DownloadBookEpisode(IConfigurationRoot config, string bookId, string episodeId, string middleId, string tokenQueryString, int filesToDownload)
         {
             string urlToDownload = "";
             string downloadFolder = @config["localDownloadFolder"] + "/" + episodeId + "/"; //Make sure this folder exists or an error will throw. Outputs in ###.jpg format.
             var logger = new Logger(config["localLogLocation"], Convert.ToBoolean(config["logToTextFile"]));
             var emailNotifier = new EmailNotifier(config);
             int errorCount = 0;
+            bool isAnyPagesDownloaded = false;
+            int pagesToDownloadAtOnce = 10;
 
             //Create folder based on episodeId if it doesn't exist
             if (!Directory.Exists(downloadFolder))
@@ -95,52 +97,75 @@ namespace BookEpisodeScanner.Utilities
                 Directory.CreateDirectory(downloadFolder);
             }
 
-            using (WebClient client = new WebClient())
-            {
-                try
-                {
-                    for (int i = 1; i <= pagesToDownload; i++)
-                    {
-                        if (errorCount > 5)
-                        {
-                            logger.Log(String.Format("Got more than 5 errors in a row, probably reached end of the book. Stopping download. Current time is {0}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.CurrentCulture)));
-                            return;
-                        }
+            var downloadTasks = new List<Task>();
 
-                        try
-                        {
-                            urlToDownload = StringHelper.GetFullVersionImageUrl(config["imageBaseURL"], bookId, episodeId, middleId, tokenQueryString, i);
-                            logger.Log(String.Format("Downloading file {0} of {1}. Current time is {2}", i, pagesToDownload, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.CurrentCulture)));
-                            await client.DownloadFileTaskAsync(new Uri(urlToDownload), downloadFolder + i.ToString("D3") + ".jpg");
-                            errorCount = 0;
-                        }
-                        catch (Exception ex)
-                        {
-                            logger.Log(String.Format("Error downloading page {0}. Current time is {1}. Error message: {1}", i, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.CurrentCulture), ex.ToString()));
-                            logger.Log(String.Format("Trying again in 10 seconds.", i, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.CurrentCulture)));
-                            emailNotifier.SendNotificationEmailError("DownloadPage", ex.ToString());
-                            Thread.Sleep(10000);
-                            i--;
-                            errorCount++;
-                        }
+            try
+            {
+                for (int i = 1; i <= filesToDownload; i++)
+                {
+                    if (errorCount > 5 && isAnyPagesDownloaded)
+                    {
+                        logger.Log(String.Format("Got more than 5 errors in a row, probably reached end of the book. Stopping download. Current time is {0}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.CurrentCulture)));
+                        return;
+                    }
+
+                    if (errorCount > 500 && !isAnyPagesDownloaded)
+                    {
+                        logger.Log(String.Format("Got more than 500 errors in a row, the book does not seem to be available. Stopping download. Current time is {0}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.CurrentCulture)));
+                        return;
+                    }
+
+                    try
+                    {
+                        urlToDownload = StringHelper.GetFullVersionImageUrl(config["imageBaseURL"], bookId, episodeId, middleId, tokenQueryString, i);
+
+                        downloadTasks.Add(DownloadFile(filesToDownload, urlToDownload, downloadFolder, logger, emailNotifier, i));
+
+                        //Downloads multiple pages at a time
+                        if (downloadTasks.Count >= pagesToDownloadAtOnce)
+                            await Task.WhenAll(downloadTasks);
+
+                        downloadTasks.RemoveAll(x => x.IsCompleted);
+
+                        errorCount = 0;
+                        isAnyPagesDownloaded = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.Log(String.Format("Error downloading page {0}. Current time is {1}. Error message: {1}", i, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.CurrentCulture), ex.ToString()));
+                        logger.Log(String.Format("Trying again in 10 seconds.", i, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.CurrentCulture)));
+                        emailNotifier.SendNotificationEmailError("DownloadPage", ex.ToString());
+                        Thread.Sleep(10000);
+                        i--;
+                        errorCount++;
                     }
                 }
-                catch (Exception ex)
-                {
-                    logger.Log(String.Format("Error in downloading book. Current time is {0}. Error: {1}", DateTime.Now.ToString(),ex.ToString()));
-                    emailNotifier.SendNotificationEmailError("DownloadBook", ex.ToString());
-                    errorCount++;
-                }
+            }
+            catch (Exception ex)
+            {
+                logger.Log(String.Format("Error in downloading book. Current time is {0}. Error: {1}", DateTime.Now.ToString(), ex.ToString()));
+                emailNotifier.SendNotificationEmailError("DownloadBook", ex.ToString());
+                errorCount++;
+            }
+        }
+
+        private static async Task DownloadFile(int pagesToDownload, string urlToDownload, string downloadFolder, Logger logger, EmailNotifier emailNotifier, int i)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                client.Timeout = TimeSpan.FromMinutes(30);
+                logger.Log(String.Format("Downloading file {0} of {1}. Current time is {2}", i, pagesToDownload, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.CurrentCulture)));
+                await client.DownloadFileTaskAsync(new Uri(urlToDownload), downloadFolder + i.ToString("D3") + ".jpg");
             }
         }
 
         public static async Task DownloadURL(IConfigurationRoot config, string url)
         {
-            string downloadFolder = @config["localDownloadFolder"]; //Make sure this folder exists or an error will be thrown.
+            string downloadFolder = @config["localDownloadFolder"]; //Make sure this folder exists or an error will throw. Outputs in ###.jpg format.
             var logger = new Logger(config["localLogLocation"], Convert.ToBoolean(config["logToTextFile"]));
             var emailNotifier = new EmailNotifier(config);
 
-            using (WebClient client = new WebClient())
+            using (HttpClient client = new HttpClient())
             {
                 try
                 {
