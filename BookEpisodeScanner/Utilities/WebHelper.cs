@@ -35,6 +35,8 @@ namespace BookEpisodeScanner.Utilities
 
                     //These values must be occasionally updated when the website updates
                     webRequest.Headers.Add(config["webRequestHeaderKey"], config["webRequestHeaderValue"]);
+                    if(!String.IsNullOrEmpty(config["RefererValue"]))
+                        webRequest.Headers.Add("Referer", config["RefererValue"]);
 
                     using (WebResponse response = await webRequest.GetResponseAsync())
                     {
@@ -71,10 +73,12 @@ namespace BookEpisodeScanner.Utilities
             return null;
         }
 
-        public static async Task<HttpStatusCode> GetUrlStatusCode(string url)
+        public static async Task<HttpStatusCode> GetUrlStatusCode(string url, string referer)
         {
             using (HttpClient client = new HttpClient())
             {
+                if (!String.IsNullOrEmpty(referer))
+                    client.DefaultRequestHeaders.Add("Referer", referer);
                 HttpResponseMessage response = await client.GetAsync(url);
 
                 return response.StatusCode;
@@ -119,7 +123,7 @@ namespace BookEpisodeScanner.Utilities
                     {
                         urlToDownload = StringHelper.GetFullVersionImageUrl(config["imageBaseURL"], bookId, episodeId, middleId, tokenQueryString, i);
 
-                        downloadTasks.Add(DownloadFile(filesToDownload, urlToDownload, downloadFolder, logger, emailNotifier, i));
+                        downloadTasks.Add(DownloadFile(filesToDownload, urlToDownload, config["refererValue"], downloadFolder, logger, emailNotifier, i));
 
                         //Downloads multiple pages at a time
                         if (downloadTasks.Count >= pagesToDownloadAtOnce)
@@ -149,10 +153,13 @@ namespace BookEpisodeScanner.Utilities
             }
         }
 
-        private static async Task DownloadFile(int pagesToDownload, string urlToDownload, string downloadFolder, Logger logger, EmailNotifier emailNotifier, int i)
+        private static async Task DownloadFile(int pagesToDownload, string urlToDownload, string refererValue, string downloadFolder, Logger logger, EmailNotifier emailNotifier, int i)
         {
             using (HttpClient client = new HttpClient())
             {
+                if (!String.IsNullOrEmpty(refererValue))
+                    client.DefaultRequestHeaders.Add("Referer", refererValue);
+
                 client.Timeout = TimeSpan.FromMinutes(30);
                 logger.Log(String.Format("Downloading file {0} of {1}. Current time is {2}", i, pagesToDownload, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.CurrentCulture)));
                 await client.DownloadFileTaskAsync(new Uri(urlToDownload), downloadFolder + i.ToString("D3") + ".jpg");

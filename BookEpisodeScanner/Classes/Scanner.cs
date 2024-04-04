@@ -71,7 +71,7 @@ namespace BookEpisodeScanner.Classes
 
                 try
                 {
-                    HttpStatusCode currentStatusCode = await WebHelper.GetUrlStatusCode(previewImageUrl);
+                    HttpStatusCode currentStatusCode = await WebHelper.GetUrlStatusCode(previewImageUrl, config["refererValue"]);
 
                     switch (currentStatusCode)
                     {
@@ -133,14 +133,14 @@ namespace BookEpisodeScanner.Classes
 
             finalImageUrl = StringHelper.GetFullVersionImageUrl(config["imageBaseURL"], settings.BookId, settings.CurrentEpisodeId, settings.MiddleId, tokenQueryString);
 
-            HttpStatusCode fullVersionStatusCode = await WebHelper.GetUrlStatusCode(finalImageUrl);
+            HttpStatusCode fullVersionStatusCode = await WebHelper.GetUrlStatusCode(finalImageUrl, config["refererValue"]);
 
             //Sometimes the full version is not put up at the exact same time as the preview version, but usually soon after.
             while (fullVersionStatusCode != HttpStatusCode.OK)
             {
                 logger.Log(String.Format("Full version is not up yet. Retrying in 1 minute. The current time is: {0}", DateTime.Now.ToString()));
                 await Wait(60000);
-                fullVersionStatusCode = await WebHelper.GetUrlStatusCode(finalImageUrl);
+                fullVersionStatusCode = await WebHelper.GetUrlStatusCode(finalImageUrl, config["refererValue"]);
             }
 
             //Will download either the maximum pages to download or when there's no pages left in the episode, whichever comes first.

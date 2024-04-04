@@ -58,7 +58,7 @@ namespace FODFujiTVMangaScanner.Classes
                 try
                 {
 
-                    HttpStatusCode currentStatusCode = await WebHelper.GetUrlStatusCode(url);
+                    HttpStatusCode currentStatusCode = await WebHelper.GetUrlStatusCode(url, config["refererValue"]);
 
                     switch (currentStatusCode)
                     {
